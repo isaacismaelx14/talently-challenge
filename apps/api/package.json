@@ -1,0 +1,11 @@
+{
+    "name": "@talently/api",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "php artisan serve",
+        "build": "php artisan config:cache",
+        "lint": "./vendor/bin/pint --test",
+        "test": "php artisan test"
+    }
+}

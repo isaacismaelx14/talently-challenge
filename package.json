@@ -1,0 +1,23 @@
+{
+  "name": "talently-challenge",
+  "private": true,
+  "packageManager": "bun@1.3.8",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test --filter=@talently/api",
+    "dev:web": "cd apps/web && bun run dev",
+    "build:web": "cd apps/web && bun run build",
+    "preview:web": "cd apps/web && bun run preview",
+    "lint:web": "cd apps/web && bun run lint",
+    "dev:api": "cd apps/api && php artisan serve",
+    "test:api": "cd apps/api && php artisan test"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  }
+}

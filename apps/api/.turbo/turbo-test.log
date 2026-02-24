@@ -1,0 +1,31 @@
+
+[0m[2m[35m$[0m [2m[1mphp artisan test[0m
+PHP Deprecated:  NunoMaduro\Collision\Adapters\Phpunit\Printer::__construct(): Implicitly marking parameter $output as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/Printer.php on line 61
+
+Deprecated: NunoMaduro\Collision\Adapters\Phpunit\Printer::__construct(): Implicitly marking parameter $output as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/Printer.php on line 61
+PHP Deprecated:  Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/ConfigureIO.php on line 37
+
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/ConfigureIO.php on line 37
+PHP Deprecated:  NunoMaduro\Collision\Adapters\Phpunit\Style::writeRecap(): Implicitly marking parameter $timer as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/Style.php on line 119
+
+Deprecated: NunoMaduro\Collision\Adapters\Phpunit\Style::writeRecap(): Implicitly marking parameter $timer as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/Style.php on line 119
+PHP Deprecated:  NunoMaduro\Collision\Adapters\Phpunit\Style::testLineFrom(): Implicitly marking parameter $warning as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/Style.php on line 252
+
+Deprecated: NunoMaduro\Collision\Adapters\Phpunit\Style::testLineFrom(): Implicitly marking parameter $warning as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/Style.php on line 252
+PHP Deprecated:  NunoMaduro\Collision\Adapters\Phpunit\TestResult::__construct(): Implicitly marking parameter $throwable as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/TestResult.php on line 82
+
+Deprecated: NunoMaduro\Collision\Adapters\Phpunit\TestResult::__construct(): Implicitly marking parameter $throwable as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/TestResult.php on line 82
+PHP Deprecated:  NunoMaduro\Collision\Adapters\Phpunit\TestResult::fromTestCase(): Implicitly marking parameter $throwable as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/TestResult.php on line 104
+
+Deprecated: NunoMaduro\Collision\Adapters\Phpunit\TestResult::fromTestCase(): Implicitly marking parameter $throwable as nullable is deprecated, the explicit nullable type must be used instead in /Users/isaac/Development/personal/talently-challenge/apps/api/vendor/nunomaduro/collision/src/Adapters/Phpunit/TestResult.php on line 104
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\ExampleTest[39m
+  [32;1m✓[39;22m[39m [2mthat true is true[22m[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\ExampleTest[39m
+  [32;1m✓[39;22m[39m [2mthe application returns a successful response[22m[39m
+
+  [37;1mTests:  [39;22m[32;1m2 passed[39;22m
+  [37;1mTime:   [39;22m[39m0.05s[39m
+
+
