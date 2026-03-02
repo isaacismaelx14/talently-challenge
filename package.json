@@ -15,7 +15,8 @@
     "preview:web": "cd apps/web && bun run preview",
     "lint:web": "cd apps/web && bun run lint",
     "dev:api": "cd apps/api && php artisan serve",
-    "test:api": "cd apps/api && php artisan test"
+    "test:api": "cd apps/api && php artisan test",
+    "setup": "bun install && cd apps/api && composer install && php artisan migrate && php artisan app:create-default-user"
   },
   "devDependencies": {
     "turbo": "^2.5.8"
