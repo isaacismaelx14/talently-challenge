@@ -40,7 +40,11 @@ class ScoringService implements ScoringServiceInterface
                 $totalScore += $points;
 
                 if ($criterion->required && in_array($result, ['no_match', 'unknown'])) {
-                    $gaps[] = $criterion->key;
+                    $gaps[] = [
+                        'criteria_key' => $criterion->key,
+                        'criteria_label' => $criterion->label,
+                        'reason' => $evaluation['evidence'] ?? 'Criterion requirements not found in CV'
+                    ];
                 }
 
                 $scoresToInsert[] = [
@@ -97,7 +101,7 @@ class ScoringService implements ScoringServiceInterface
                 return [
                     'result' => $match ? 'match' : 'no_match',
                     'score' => $match ? 1.0 : 0.0,
-                    'evidence' => "Value: " . json_encode($value),
+                    'evidence' => "Found relevant experience/skill matching: " . $criterion->label,
                     'confidence' => 1.0
                 ];
 
@@ -105,21 +109,21 @@ class ScoringService implements ScoringServiceInterface
                 $expectedMin = $expected['min'] ?? 0;
                 $years = (float) $value;
                 if ($years >= $expectedMin) {
-                    return ['result' => 'match', 'score' => 1.0, 'evidence' => "Years: $years", 'confidence' => 1.0];
+                    return ['result' => 'match', 'score' => 1.0, 'evidence' => "Found $years years of experience (Target: $expectedMin+)", 'confidence' => 1.0];
                 } elseif ($years > 0) {
-                    return ['result' => 'partial', 'score' => $years / $expectedMin, 'evidence' => "Years: $years", 'confidence' => 1.0];
+                    return ['result' => 'partial', 'score' => $years / $expectedMin, 'evidence' => "Found $years years of experience (Target: $expectedMin+)", 'confidence' => 1.0];
                 }
-                return ['result' => 'no_match', 'score' => 0.0, 'evidence' => "Years: $years", 'confidence' => 1.0];
+                return ['result' => 'no_match', 'score' => 0.0, 'evidence' => "Only $years years found", 'confidence' => 1.0];
 
             case 'enum':
                 $expectedLevel = strtolower($expected['level'] ?? '');
                 $actual = strtolower((string) $value);
                 if ($actual === $expectedLevel) {
-                    return ['result' => 'match', 'score' => 1.0, 'evidence' => "Level: $actual", 'confidence' => 1.0];
+                    return ['result' => 'match', 'score' => 1.0, 'evidence' => "Level matched: $actual", 'confidence' => 1.0];
                 }
                 // basic partial matching (B1 part of B2 string etc)
                 if (str_contains($expectedLevel, $actual) || str_contains($actual, $expectedLevel)) {
-                    return ['result' => 'partial', 'score' => 0.5, 'evidence' => "Level: $actual", 'confidence' => 0.8];
+                    return ['result' => 'partial', 'score' => 0.5, 'evidence' => "Related level: $actual", 'confidence' => 0.8];
                 }
                 return ['result' => 'no_match', 'score' => 0.0, 'evidence' => "Level: $actual", 'confidence' => 1.0];
 
@@ -128,7 +132,7 @@ class ScoringService implements ScoringServiceInterface
                 return [
                     'result' => 'match',
                     'score' => min($score / 5, 1.0),
-                    'evidence' => "Score: $score",
+                    'evidence' => "Assessed score: $score/5",
                     'confidence' => 1.0
                 ];
         }
@@ -138,37 +142,51 @@ class ScoringService implements ScoringServiceInterface
 
     protected function extractValueForKey($key, $extractedData)
     {
-        // Try to find the key in skills, experience, education, languages
-        // A real robust system would map criteria to specific schema properties.
-        // For the sake of this mock API:
-
         $skills = $extractedData['skills'] ?? [];
-        if (in_array(strtolower($key), array_map('strtolower', $skills))) {
-            return true;
-        }
+        $loweredKey = strtolower($key);
 
-        foreach ($extractedData['experience'] ?? [] as $exp) {
-            if (
-                str_contains(strtolower($exp['title'] ?? ''), $key) ||
-                str_contains(strtolower($exp['company'] ?? ''), $key)
-            ) {
-                return $exp['years'] ?? 0;
-            }
-        }
-
-        foreach ($extractedData['education'] ?? [] as $edu) {
-            if (str_contains(strtolower($edu['degree'] ?? ''), $key)) {
+        // Strategy 1: Direct skill match
+        foreach ($skills as $skill) {
+            $loweredSkill = strtolower($skill);
+            if ($loweredSkill === $loweredKey || str_contains($loweredKey, $loweredSkill) || str_contains($loweredSkill, $loweredKey)) {
                 return true;
             }
         }
 
+        // Strategy 2: Experience match by keywords
+        $keyParts = explode('_', $loweredKey);
+        $meaningfulParts = array_filter($keyParts, fn($p) => strlen($p) > 3 && !in_array($p, ['years', 'experience', 'production', 'level']));
+
+        foreach ($extractedData['experience'] ?? [] as $exp) {
+            $titleAndCompany = strtolower(($exp['title'] ?? '') . ' ' . ($exp['company'] ?? ''));
+
+            // If any meaningful part of the key is in the title, we count it
+            foreach ($meaningfulParts as $part) {
+                if (str_contains($titleAndCompany, $part)) {
+                    return $exp['years'] ?? 0;
+                }
+            }
+        }
+
+        // Strategy 3: Education match
+        foreach ($extractedData['education'] ?? [] as $edu) {
+            $degree = strtolower($edu['degree'] ?? '');
+            foreach ($meaningfulParts as $part) {
+                if (str_contains($degree, $part)) {
+                    return true;
+                }
+            }
+        }
+
+        // Strategy 4: Languages
         foreach ($extractedData['languages'] ?? [] as $lang) {
-            if (str_contains(strtolower($lang['language'] ?? ''), $key)) {
+            $language = strtolower($lang['language'] ?? '');
+            if (str_contains($loweredKey, $language)) {
                 return $lang['level'] ?? null;
             }
         }
 
-        // Just in case we provided the extraction differently
+        // Fallback: Direct object key
         if (isset($extractedData[$key])) {
             return $extractedData[$key];
         }

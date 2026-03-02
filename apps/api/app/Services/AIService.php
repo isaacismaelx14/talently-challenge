@@ -61,10 +61,11 @@ class AIService implements AIServiceInterface
                                             'expected_value' => [
                                                 'type' => ['object', 'null'],
                                                 'properties' => [
-                                                    'min' => ['type' => 'integer'],
-                                                    'value' => ['type' => 'boolean'],
-                                                    'level' => ['type' => 'string'],
+                                                    'min' => ['type' => ['integer', 'null']],
+                                                    'value' => ['type' => ['boolean', 'null']],
+                                                    'level' => ['type' => ['string', 'null']],
                                                 ],
+                                                'required' => ['min', 'value', 'level'],
                                                 'additionalProperties' => false
                                             ]
                                         ],

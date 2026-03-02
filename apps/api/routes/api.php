@@ -44,5 +44,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/job-offers/{jobOffer}/criteria', [CriteriaController::class, 'index']);
     Route::get('/candidates', [CandidateController::class, 'index']);
     Route::get('/candidates/{candidate}', [CandidateController::class, 'show']);
+    Route::delete('/candidates/{candidate}', [CandidateController::class, 'destroy']);
     Route::get('/scorings/{scoring}', [ScoringController::class, 'show']);
 });
