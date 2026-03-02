@@ -8,7 +8,8 @@ vendor
 node_modules
 
 # Cached bootstrap (rebuilt in Docker)
-bootstrap/cache/*.php
+bootstrap/cache/packages.php
+bootstrap/cache/services.php
 
 # Docker configs (not needed inside image)
 docker-compose*.yml

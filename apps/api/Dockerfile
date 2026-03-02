@@ -54,7 +54,7 @@ WORKDIR /var/www/html
 COPY --chown=www-data:www-data . .
 COPY --from=vendor --chown=www-data:www-data /app/vendor ./vendor
 
-# Remove dev files that should not be in production
+# Remove dev files and stale bootstrap cache
 RUN rm -rf \
     tests \
     docker \
@@ -62,7 +62,9 @@ RUN rm -rf \
     .env.example \
     phpunit.xml \
     docker-compose.yml \
-    README.md
+    README.md \
+    bootstrap/cache/packages.php \
+    bootstrap/cache/services.php
 
 # Prepare Laravel storage & cache directories
 RUN mkdir -p \
@@ -80,7 +82,7 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl -sf http://127.0.0.1/api/health || exit 1
+    CMD curl -sf http://127.0.0.1/v1/health || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
