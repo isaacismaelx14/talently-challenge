@@ -1,66 +1,146 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Talently API Base (Laravel 9+)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API-first Laravel backend skeleton with:
+- PostgreSQL
+- Sanctum token authentication
+- Versioned API routes (`/v1`)
+- Request validation + service layer + contract binding
+- Queue-ready setup for async jobs
 
-## About Laravel
+## 1) Project Structure (Clean and Scalable)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```text
+apps/api
+├── app
+│   ├── Contracts
+│   │   └── Services
+│   │       └── JobOfferServiceInterface.php
+│   ├── Http
+│   │   ├── Controllers
+│   │   │   └── Api
+│   │   │       └── V1
+│   │   │           ├── AuthController.php
+│   │   │           └── JobOfferController.php
+│   │   └── Requests
+│   │       ├── Auth
+│   │       │   ├── LoginRequest.php
+│   │       │   └── RegisterRequest.php
+│   │       └── JobOffer
+│   │           └── StoreJobOfferRequest.php
+│   ├── Models
+│   │   ├── JobOffer.php
+│   │   └── User.php
+│   ├── Providers
+│   │   └── AppServiceProvider.php
+│   └── Services
+│       └── JobOfferService.php
+├── database
+│   └── migrations
+│       ├── 2026_02_25_000000_create_job_offers_table.php
+│       └── 2026_02_25_000001_create_jobs_table.php
+└── routes
+    └── api.php
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 2) Required Composer Packages
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Already included in `composer.json`:
+- `laravel/framework:^9.19`
+- `laravel/sanctum:^3.0`
+- `guzzlehttp/guzzle:^7.2`
 
-## Learning Laravel
+If starting from scratch:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+composer require laravel/sanctum
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+php artisan migrate
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 3) Configuration Steps
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Install dependencies:
+   ```bash
+   cd apps/api
+   composer install
+   ```
+2. Create environment file:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+3. Start PostgreSQL (if using Docker):
+   ```bash
+   docker compose up -d
+   ```
+4. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+5. Run worker for async jobs:
+   ```bash
+   php artisan queue:work --tries=3 --backoff=10
+   ```
+6. Start API server:
+   ```bash
+   php artisan serve
+   ```
 
-## Laravel Sponsors
+## 4) Important `.env` Variables
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Defined in `.env.example`:
 
-### Premium Partners
+- `APP_ENV`, `APP_DEBUG`: runtime behavior and error verbosity.
+- `DB_*`: PostgreSQL connection settings.
+- `QUEUE_CONNECTION=database`: required for production-style async processing.
+- `LOG_LEVEL=info`: production-safe baseline.
+- `SANCTUM_STATEFUL_DOMAINS`: required when using Sanctum with SPA/cookie auth.
+- `API_RATE_LIMIT_PER_MINUTE`: central control for API throttle policy.
+- `OPENAI_API_KEY`, `OPENAI_MODEL`: reserved for future AI scoring modules.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## 5) API Routes (`routes/api.php`)
 
-## Contributing
+- `GET /v1/health`
+- `POST /v1/auth/register`
+- `POST /v1/auth/login`
+- `GET /v1/auth/me` (auth required)
+- `POST /v1/auth/logout` (auth required)
+- `GET /v1/job-offers` (auth required)
+- `POST /v1/job-offers` (auth required)
+- `GET /v1/job-offers/{job_offer}` (auth required, binds by `public_id`)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 6) Why Each Layer Exists
 
-## Code of Conduct
+- **Controller layer (`Http/Controllers`)**:
+  Handles HTTP concerns only (request/response, auth context, status codes).
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- **FormRequest layer (`Http/Requests`)**:
+  Centralizes validation and keeps controllers thin.
 
-## Security Vulnerabilities
+- **Service layer (`Services`)**:
+  Holds business use-cases and orchestration logic (transaction boundaries, creation rules).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- **Contract layer (`Contracts`)**:
+  Applies dependency inversion (controllers depend on interfaces, not concrete classes).
 
-## License
+- **Model layer (`Models`)**:
+  Encapsulates persistence mapping and relationships.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **Migration layer (`database/migrations`)**:
+  Versioned schema evolution for reliable deployments.
+
+## 7) Key Architectural Decisions
+
+1. **API versioning (`/v1`)**: enables backward-compatible evolution.
+2. **Sanctum token auth**: simple, secure, first-party API auth without OAuth complexity.
+3. **Service + contract pattern**: improves testability and enforces separation of concerns.
+4. **Database queue driver**: production-like async foundation without external infra dependency.
+5. **`public_id` UUID for external URLs**: avoids exposing sequential internal IDs.
+6. **Minimal but explicit structure**: clean base now, easy to extend later (scoring, AI extraction, background pipelines).
+
+## 8) Example Components in This Base
+
+- Example controller: `app/Http/Controllers/Api/V1/JobOfferController.php`
+- Example service: `app/Services/JobOfferService.php`
+- Example request validation: `app/Http/Requests/JobOffer/StoreJobOfferRequest.php`
+- Example migration: `database/migrations/2026_02_25_000000_create_job_offers_table.php`
