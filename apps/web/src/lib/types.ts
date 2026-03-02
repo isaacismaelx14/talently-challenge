@@ -78,13 +78,21 @@ export interface ExtractedCVData {
     phone?: string
     location?: string
   }
+  total_years_experience?: number
   skills?: string[]
+  technology_experience?: {
+    technology: string
+    years: number
+  }[]
   experience?: {
     title: string
     company: string
-    duration: string
+    start_date?: string
+    end_date?: string
+    duration?: string
     years?: number
     description?: string
+    technologies?: string[]
   }[]
   education?: {
     degree: string
@@ -96,6 +104,7 @@ export interface ExtractedCVData {
     level: string
   }[]
   certifications?: string[]
+  raw_text?: string
 }
 
 // Candidate entity

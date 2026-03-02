@@ -36,6 +36,7 @@ import {
   User,
   AlertCircle,
   Eye,
+  Clock,
 } from 'lucide-react'
 
 export default function CandidateDetailPage() {
@@ -125,6 +126,15 @@ export default function CandidateDetailPage() {
               <span className="text-sm text-muted-foreground">Email Address</span>
               <span className="font-medium">{candidate.email}</span>
             </div>
+            {extractedData?.total_years_experience && (
+              <div className="flex flex-col">
+                <span className="text-sm text-muted-foreground">Total Experience</span>
+                <span className="font-medium flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-primary" />
+                  {extractedData.total_years_experience} year{extractedData.total_years_experience !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
             <div className="flex flex-col">
               <span className="text-sm text-muted-foreground">Resume Hash</span>
               <span className="font-mono text-sm" title={candidate.cv_hash}>
@@ -265,22 +275,46 @@ export default function CandidateDetailPage() {
                   <h4 className="font-medium flex items-center gap-2">
                     <Briefcase className="h-4 w-4" />
                     Work Experience
+                    {extractedData.total_years_experience && (
+                      <Badge variant="outline" className="text-xs ml-1">
+                        {extractedData.total_years_experience}+ yrs total
+                      </Badge>
+                    )}
                   </h4>
                   <div className="space-y-3">
-                    {extractedData.experience.slice(0, 3).map((exp, i) => (
+                    {extractedData.experience.slice(0, 5).map((exp, i) => (
                       <div key={i} className="border-l-2 border-primary/30 pl-3">
                         <p className="font-medium text-sm">{exp.title}</p>
                         <p className="text-sm text-muted-foreground">{exp.company}</p>
-                        {exp.years && (
-                          <p className="text-xs text-muted-foreground">
-                            {exp.years} year{exp.years !== 1 ? 's' : ''}
-                          </p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          {exp.start_date && exp.end_date && (
+                            <span>{exp.start_date} – {exp.end_date}</span>
+                          )}
+                          {exp.years != null && (
+                            <span className="text-primary font-medium">
+                              ({exp.years} yr{exp.years !== 1 ? 's' : ''})
+                            </span>
+                          )}
+                        </div>
+                        {exp.technologies && exp.technologies.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {exp.technologies.slice(0, 6).map((tech, j) => (
+                              <Badge key={j} variant="outline" className="text-[10px] px-1.5 py-0">
+                                {tech}
+                              </Badge>
+                            ))}
+                            {exp.technologies.length > 6 && (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                +{exp.technologies.length - 6}
+                              </Badge>
+                            )}
+                          </div>
                         )}
                       </div>
                     ))}
-                    {extractedData.experience.length > 3 && (
+                    {extractedData.experience.length > 5 && (
                       <p className="text-xs text-muted-foreground">
-                        +{extractedData.experience.length - 3} more positions
+                        +{extractedData.experience.length - 5} more positions
                       </p>
                     )}
                   </div>
@@ -304,6 +338,42 @@ export default function CandidateDetailPage() {
                         )}
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Technology Experience (with years) */}
+              {extractedData.technology_experience && extractedData.technology_experience.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-medium flex items-center gap-2">
+                    <Code className="h-4 w-4" />
+                    Technology Experience
+                  </h4>
+                  <div className="space-y-1.5">
+                    {extractedData.technology_experience
+                      .sort((a, b) => b.years - a.years)
+                      .slice(0, 12)
+                      .map((tech, i) => (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <span>{tech.technology}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 bg-muted rounded-full h-1.5">
+                              <div
+                                className="bg-primary rounded-full h-1.5 transition-all"
+                                style={{ width: `${Math.min((tech.years / (extractedData.total_years_experience || 10)) * 100, 100)}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground w-12 text-right">
+                              {tech.years} yr{tech.years !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    {extractedData.technology_experience.length > 12 && (
+                      <p className="text-xs text-muted-foreground">
+                        +{extractedData.technology_experience.length - 12} more technologies
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

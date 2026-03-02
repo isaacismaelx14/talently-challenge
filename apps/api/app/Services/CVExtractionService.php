@@ -22,7 +22,7 @@ class CVExtractionService implements CVExtractionServiceInterface
         $this->pdfParser = new Parser();
     }
 
-    public function parseAndExtract(Candidate $candidate, array $criteria): array
+    public function parseAndExtract(Candidate $candidate, array $criteria = []): array
     {
         if (!$this->shouldReprocess($candidate) && !empty($candidate->extracted_data)) {
             return $candidate->extracted_data;
@@ -58,7 +58,10 @@ class CVExtractionService implements CVExtractionServiceInterface
             $pdf = $this->pdfParser->parseFile($filePath);
             $text = $this->truncateText($pdf->getText());
 
-            $extractedData = $this->aiService->extractCVData($text, $criteria);
+            $extractedData = $this->aiService->extractCVData($text);
+
+            // Store raw CV text alongside extracted data for later AI evaluation
+            $extractedData['raw_text'] = $text;
 
             $candidate->update([
                 'cv_hash' => $currentHash,
@@ -74,6 +77,30 @@ class CVExtractionService implements CVExtractionServiceInterface
             ]);
             $candidate->update(['extraction_status' => 'failed']);
             throw $e;
+        }
+    }
+
+    public function getRawText(Candidate $candidate): ?string
+    {
+        $extractedData = $candidate->extracted_data;
+        if (!empty($extractedData['raw_text'])) {
+            return $extractedData['raw_text'];
+        }
+
+        try {
+            $filePath = $this->getSecureFilePath($candidate->cv_file_path);
+            if (!file_exists($filePath)) {
+                return null;
+            }
+
+            $pdf = $this->pdfParser->parseFile($filePath);
+            return $this->truncateText($pdf->getText());
+        } catch (\Exception $e) {
+            Log::warning("Could not re-parse CV for raw text", [
+                'candidate_id' => $candidate->public_id,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
         }
     }
 

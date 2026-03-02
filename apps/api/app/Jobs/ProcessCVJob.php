@@ -31,9 +31,8 @@ class ProcessCVJob implements ShouldQueue
 
     public function handle(CVExtractionServiceInterface $cvService)
     {
-        // Criteria needed for AI parsing context
-        $criteria = $this->jobOffer->selectionCriteria->toArray();
-        $cvService->parseAndExtract($this->candidate, $criteria);
+        // Generic extraction — no longer depends on job criteria
+        $cvService->parseAndExtract($this->candidate);
 
         // Chain the scoring job after successful extraction
         dispatch(new CalculateScoringJob($this->candidate, $this->jobOffer));
@@ -41,7 +40,10 @@ class ProcessCVJob implements ShouldQueue
 
     public function failed(\Throwable $exception)
     {
-        Log::error("ProcessCVJob failed for Candidate {$this->candidate->id}: " . $exception->getMessage());
+        Log::error('ProcessCVJob failed', [
+            'candidate_id' => $this->candidate->public_id,
+            'error' => $exception->getMessage(),
+        ]);
         $this->candidate->update(['extraction_status' => 'failed']);
     }
 }
