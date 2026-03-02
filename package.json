@@ -16,7 +16,10 @@
     "lint:web": "cd apps/web && bun run lint",
     "dev:api": "cd apps/api && php artisan serve",
     "test:api": "cd apps/api && php artisan test",
-    "setup": "bun install && cd apps/api && composer install && php artisan migrate && php artisan app:create-default-user"
+    "setup": "bun install && cd apps/api && composer install && php artisan migrate && php artisan app:create-default-user",
+    "preview": "docker compose -f docker-compose.preview.yml up --build -d",
+    "preview:down": "docker compose -f docker-compose.preview.yml down",
+    "preview:logs": "docker compose -f docker-compose.preview.yml logs -f"
   },
   "devDependencies": {
     "turbo": "^2.5.8"

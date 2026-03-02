@@ -1,0 +1,32 @@
+.git
+.github
+.idea
+.vscode
+
+# Dependencies (rebuilt in Docker)
+vendor
+node_modules
+
+# Cached bootstrap (rebuilt in Docker)
+bootstrap/cache/*.php
+
+# Docker configs (not needed inside image)
+docker-compose*.yml
+Dockerfile
+
+# Dev/test files
+tests
+phpunit.xml
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+storage/logs/*
+
+# IDE
+*.swp
+*.swo

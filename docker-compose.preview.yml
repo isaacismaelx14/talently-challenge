@@ -1,0 +1,64 @@
+name: talently-challenge
+
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: talently_api
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: TalentlyAPI
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8080
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: info
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: talently
+      DB_USERNAME: talently
+      DB_PASSWORD: talently
+      DB_SSLMODE: prefer
+      CACHE_DRIVER: file
+      QUEUE_CONNECTION: database
+      SESSION_DRIVER: cookie
+      FILESYSTEM_DISK: local
+      SANCTUM_STATEFUL_DOMAINS: localhost,127.0.0.1
+      AI_GATEWAY_BASE_URL: ${AI_GATEWAY_BASE_URL:-https://ai-gateway.vercel.sh/v1}
+      AI_GATEWAY_API_KEY: ${AI_GATEWAY_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-openai/gpt-4o}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: talently_preview_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: talently
+      POSTGRES_USER: talently
+      POSTGRES_PASSWORD: talently
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U talently -d talently"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - internal
+    # No ports exposed — only reachable by the api service
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    driver: bridge
