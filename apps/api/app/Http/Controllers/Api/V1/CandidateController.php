@@ -61,7 +61,18 @@ class CandidateController extends Controller
 
     public function show(Candidate $candidate)
     {
-        $candidate->load('scorings.criteriaScores.selectionCriteria');
+        $candidate->load(['scorings.jobOffer', 'scorings.criteriaScores.selectionCriteria']);
         return response()->json(['data' => $candidate]);
+    }
+
+    public function destroy(Candidate $candidate)
+    {
+        if ($candidate->cv_file_path && Storage::exists($candidate->cv_file_path)) {
+            Storage::delete($candidate->cv_file_path);
+        }
+
+        $candidate->delete();
+
+        return response()->json(null, 204);
     }
 }

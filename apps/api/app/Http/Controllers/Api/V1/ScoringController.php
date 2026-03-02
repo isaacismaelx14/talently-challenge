@@ -30,7 +30,27 @@ class ScoringController extends Controller
 
     public function show(CandidateScoring $scoring)
     {
-        $scoring->load('criteriaScores.selectionCriteria', 'candidate', 'jobOffer');
+        $scoring->load(['criteriaScores.selectionCriteria', 'candidate', 'jobOffer.selectionCriteria']);
+
+        // Handle legacy string-based gaps for display
+        $gaps = $scoring->gaps ?? [];
+        $formattedGaps = [];
+        foreach ($gaps as $gap) {
+            if (is_string($gap)) {
+                // Try to find the criterion label from the job offer's criteria
+                $criterion = $scoring->jobOffer->selectionCriteria->where('key', $gap)->first();
+                $formattedGaps[] = [
+                    'criteria_key' => $gap,
+                    'criteria_label' => $criterion ? $criterion->label : $gap,
+                    'reason' => 'Criterion requirements not found in CV'
+                ];
+            } else {
+                $formattedGaps[] = $gap;
+            }
+        }
+
+        // Update the gaps on the model instance for the response
+        $scoring->gaps = $formattedGaps;
 
         $breakdown = $this->scoringService->getBreakdown($scoring);
 
