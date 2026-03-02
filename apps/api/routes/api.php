@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\JobOfferController;
+use App\Http\Controllers\Api\V1\CriteriaController;
+use App\Http\Controllers\Api\V1\CandidateController;
+use App\Http\Controllers\Api\V1\ScoringController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +34,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::apiResource('job-offers', JobOfferController::class)
         ->only(['index', 'store', 'show']);
+
+    Route::middleware('throttle:10,1')->group(function (): void {
+        Route::post('/job-offers/{jobOffer}/criteria/generate', [CriteriaController::class, 'generate']);
+        Route::post('/candidates', [CandidateController::class, 'store']);
+        Route::post('/job-offers/{jobOffer}/score/{candidate}', [ScoringController::class, 'calculate']);
+    });
+
+    Route::get('/job-offers/{jobOffer}/criteria', [CriteriaController::class, 'index']);
+    Route::get('/candidates', [CandidateController::class, 'index']);
+    Route::get('/candidates/{candidate}', [CandidateController::class, 'show']);
+    Route::get('/scorings/{scoring}', [ScoringController::class, 'show']);
 });
