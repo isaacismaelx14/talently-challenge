@@ -33,6 +33,12 @@ Help me execute each step, diagnose any errors, and confirm everything is workin
 - Keep this key handy for the setup process
 
 ### Step 2 — Install dependencies and run setup
+**Fully automated setup (recommended for AI assistants):**
+```bash
+bun setup --mode=preview --api-key="vg_your_api_key_here"
+```
+
+**Manual setup options:**
 If bun is installed:
   bun setup
 Otherwise:
@@ -45,19 +51,15 @@ This launches an interactive setup with 3 options:
 
 Choose **Preview Mode** for the quickest experience.
 
-### Step 3 — Provide your AI Gateway key
+### Step 3 — Provide your AI Gateway key (if not using automated setup)
 **Option A: Direct flag (recommended)**
 ```bash
-bun setup --api-key="vg_your_api_key_here"
+bun setup --mode=preview --api-key="vg_your_api_key_here"
 ```
-This skips the interactive prompt and goes straight to setup.
+This completely skips all interactive prompts and goes straight to preview setup.
 
 **Option B: Interactive prompt**  
 If you prefer not to provide the API key in the command, simply run `bun setup`, select option 1 (Preview Mode), and you'll be prompted to enter your key during the setup process.
-
-During setup, you may also be prompted for:
-- Database settings (use defaults)
-- Port configuration (use auto-detected ports)
 
 ### Step 4 — Wait for Docker build
 First build takes ~3-5 minutes due to:

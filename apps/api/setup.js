@@ -27,6 +27,23 @@ if (apiKeyIndex !== -1) {
   }
 }
 
+// Extract mode from --mode flag
+let providedMode = null;
+const modeIndex = args.findIndex(arg => arg.startsWith('--mode'));
+if (modeIndex !== -1) {
+  const modeArg = args[modeIndex];
+  if (modeArg.includes('=')) {
+    providedMode = modeArg.split('=')[1];
+  } else if (args[modeIndex + 1] && !args[modeIndex + 1].startsWith('-')) {
+    providedMode = args[modeIndex + 1];
+  }
+  // Validate mode value
+  if (!['preview', 'local', 'none'].includes(providedMode)) {
+    console.error(`❌ Invalid mode: ${providedMode}. Valid options: preview, local, none`);
+    process.exit(1);
+  }
+}
+
 if (showHelp) {
   console.log(`
 🚀 Talently Project Setup Script
@@ -39,6 +56,7 @@ Options:
   -h, --help           Show this help message
   -f, --force          Force overwrite existing .env files
   --api-key <key>      Provide AI Gateway API key directly (avoids prompt)
+  --mode <mode>        Setup mode: preview, local, or none (avoids mode selection)
 
 Setup Modes:
   1. Preview Mode
@@ -72,6 +90,8 @@ Examples:
   node setup.js                              # Interactive mode selection
   node setup.js --force                      # Overwrite existing files
   node setup.js --api-key=vg_abcd123...     # Provide API key directly
+  node setup.js --mode=preview              # Use preview mode directly
+  node setup.js --mode=preview --api-key=vg_abcd123...  # Fully automated
   npm run setup:env                          # Run via npm script
   npm run setup                              # Full development setup
 `);
@@ -407,7 +427,14 @@ async function createEnvFiles(mode = 'env-only') {
 async function main() {
   try {
     // Get setup mode choice
-    const mode = await promptSetupMode();
+    let mode;
+    if (providedMode) {
+      // Map 'none' to 'env-only' for internal consistency
+      mode = providedMode === 'none' ? 'env-only' : (providedMode === 'local' ? 'development' : providedMode);
+      log(`✅ Using provided setup mode: ${providedMode}`, 'green');
+    } else {
+      mode = await promptSetupMode();
+    }
 
     const envResult = await createEnvFiles(mode);
     if (!envResult.success) {
