@@ -57,11 +57,37 @@ php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
 php artisan migrate
 ```
 
-## 3) Configuration Steps
+## 3) Quick Setup
+
+### Automated Setup (Recommended)
+
+1. Run the interactive setup script:
+   ```bash
+   cd apps/api
+   npm run setup:env
+   ```
+   This will:
+   - Create your `.env` file from `.env.example`
+   - Create root project `.env` file
+   - Prompt you for AI Gateway API Key
+   - Generate a secure APP_KEY
+   - Configure database settings
+   - Set application preferences
+
+2. Complete the setup:
+   ```bash
+   npm run setup
+   ```
+   This will:
+   - Install Composer dependencies
+   - Run database migrations
+
+### Manual Setup (Alternative)
+
+If you prefer manual configuration:
 
 1. Install dependencies:
    ```bash
-   cd apps/api
    composer install
    ```
 2. Create environment file:
@@ -69,19 +95,27 @@ php artisan migrate
    cp .env.example .env
    php artisan key:generate
    ```
-3. Start PostgreSQL (if using Docker):
-   ```bash
-   docker compose up -d
-   ```
+3. Edit `.env` file and set:
+   - `AI_GATEWAY_API_KEY`: Your AI Gateway API key
+   - Database credentials
+   - Other application settings
+
 4. Run migrations:
    ```bash
    php artisan migrate
    ```
-5. Run worker for async jobs:
+
+### Start Development Server
+
+1. Start PostgreSQL (if using Docker):
+   ```bash
+   docker compose up -d
+   ```
+2. Run worker for async jobs:
    ```bash
    php artisan queue:work --tries=3 --backoff=10
    ```
-6. Start API server:
+3. Start API server:
    ```bash
    php artisan serve
    ```

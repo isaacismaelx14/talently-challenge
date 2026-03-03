@@ -6,6 +6,9 @@
         "dev": "php artisan serve",
         "build": "php artisan config:cache",
         "lint": "./vendor/bin/pint --test",
-        "test": "php artisan test"
+        "test": "php artisan test",
+        "setup:env": "node setup.js",
+        "setup:env:force": "node setup.js --force",
+        "setup": "npm run setup:env && composer install && php artisan migrate"
     }
 }
