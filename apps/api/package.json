@@ -7,8 +7,12 @@
         "build": "php artisan config:cache",
         "lint": "./vendor/bin/pint --test",
         "test": "php artisan test",
+        "setup": "node setup.js",
         "setup:env": "node setup.js",
-        "setup:env:force": "node setup.js --force",
-        "setup": "npm run setup:env && composer install && php artisan migrate"
+        "setup:force": "node setup.js --force",
+        "setup:development": "composer install && php artisan migrate",
+        "db:start": "docker-compose up -d postgres",
+        "db:stop": "docker-compose down postgres",  
+        "db:logs": "docker-compose logs -f postgres"
     }
 }

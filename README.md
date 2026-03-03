@@ -10,17 +10,38 @@ A full-stack application for automated CV scoring against job offers using AI-po
 
 ### Complete Setup (API + Web)
 
+### Complete Setup (API + Web)
+
 ```bash
-# Install all dependencies and setup API environment
+# Interactive setup with mode selection
 npm run setup
 ```
 
-This will:
-1. Install all dependencies (bun install)
-2. Run interactive setup (creates both API and root .env files)
-3. Install Laravel dependencies 
-4. Run database migrations
-5. Create default user
+You'll be prompted to choose your setup mode:
+1. **Preview mode** - Full Docker stack ready for testing
+2. **Local development** - PostgreSQL + dependencies + migrations
+3. **Environment only** - Just creates .env files for manual setup
+
+The script will:
+- Install all dependencies (bun install)  
+- Run interactive setup (creates both API and root .env files)
+- Execute your chosen setup mode automatically
+
+### Test Credentials
+
+After setup, you can log in with:
+- **Email**: test@example.local  
+- **Password**: admin
+
+### Service URLs
+
+**Preview Mode:**
+- Dashboard: http://localhost:3000 (or auto-assigned port)
+- API: http://localhost:8080/v1 (or auto-assigned port)
+
+**Development Mode:**  
+- API: http://localhost:8000/v1 (after running `php artisan serve`)
+- Database: PostgreSQL @ localhost:5433 (or auto-assigned port)
 
 ### Individual Component Setup
 
@@ -76,11 +97,21 @@ talently-challenge/
 
 ## Available Scripts
 
-- `npm run setup` - Complete project setup
+- `npm run setup` - Interactive setup with mode selection
 - `npm run dev` - Start both API and Web in development
 - `npm run build` - Build all applications  
 - `npm run test` - Run API tests
 - `npm run preview` - Docker preview deployment
+
+### Setup Modes Available
+- **Preview**: Full Docker stack (npm run preview)
+- **Development**: Local with PostgreSQL (npm run dev:api)  
+- **Environment**: Manual configuration needed
+
+### Database Management
+- `npm run db:start` - Start PostgreSQL container
+- `npm run db:stop` - Stop PostgreSQL container
+- `npm run db:logs` - View PostgreSQL logs
 
 ## Requirements
 
@@ -98,3 +129,51 @@ The setup script will prompt you for:
 - Application settings
 
 See `apps/api/README.md` for detailed API configuration.
+
+## Troubleshooting
+
+### Setup Mode Selection
+
+**Preview Mode**
+- Best for: Testing, demonstrations, production-like environment
+- Requirements: Docker Desktop running
+- What it does: Starts full containerized stack
+
+**Local Development Mode**  
+- Best for: Active development, debugging, code changes
+- Requirements: Docker Desktop + PHP + Composer
+- What it does: Local API with containerized database
+
+**Environment Only Mode**
+- Best for: Custom setups, CI/CD, specific configurations  
+- Requirements: None (just creates files)
+- What it does: Creates .env files for manual configuration
+
+### Port Conflicts
+
+The setup script automatically handles port conflicts for all modes:
+
+**PostgreSQL Database Ports**
+- Checks if port 5433 is available
+- Suggests next available port if conflict exists  
+- Updates .env files automatically
+
+**Preview Mode Ports**  
+- Checks if ports 3000 (web) and 8080 (api) are available
+- Uses alternative ports if conflicts detected
+- Shows actual URLs with assigned ports
+
+**Manual Port Resolution**
+
+If you need to manually change ports:
+```bash
+# For PostgreSQL
+npm run db:stop
+# Edit .env file to change POSTGRES_PORT and DB_PORT
+npm run db:start
+
+# For Preview mode
+npm run preview:down
+# Edit docker-compose.preview.yml or set WEB_PORT/API_PORT env vars
+npm run preview
+```
