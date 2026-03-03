@@ -329,13 +329,13 @@ async function createEnvFiles(mode = 'env-only') {
 
     log('\n📡 AI Configuration', 'blue');
     let aiApiKey;
-    
+
     if (providedApiKey) {
       aiApiKey = providedApiKey;
       log(`✅ Using provided AI Gateway API Key`, 'green');
     } else {
       aiApiKey = await promptUser('Enter your AI Gateway API Key (required)');
-      
+
       if (!aiApiKey || aiApiKey === 'your-key') {
         log('❌ AI Gateway API Key is required!', 'red');
         log('💡 Tip: You can provide it directly with --api-key flag', 'blue');
