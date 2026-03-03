@@ -15,6 +15,18 @@ const args = process.argv.slice(2);
 const forceOverwrite = args.includes('--force') || args.includes('-f');
 const showHelp = args.includes('--help') || args.includes('-h');
 
+// Extract API key from --api-key flag
+let providedApiKey = null;
+const apiKeyIndex = args.findIndex(arg => arg.startsWith('--api-key'));
+if (apiKeyIndex !== -1) {
+  const apiKeyArg = args[apiKeyIndex];
+  if (apiKeyArg.includes('=')) {
+    providedApiKey = apiKeyArg.split('=')[1];
+  } else if (args[apiKeyIndex + 1] && !args[apiKeyIndex + 1].startsWith('-')) {
+    providedApiKey = args[apiKeyIndex + 1];
+  }
+}
+
 if (showHelp) {
   console.log(`
 🚀 Talently Project Setup Script
@@ -24,8 +36,9 @@ Interactive setup script with multiple deployment modes.
 Usage: node setup.js [options]
 
 Options:
-  -h, --help     Show this help message
-  -f, --force    Force overwrite existing .env files
+  -h, --help           Show this help message
+  -f, --force          Force overwrite existing .env files
+  --api-key <key>      Provide AI Gateway API key directly (avoids prompt)
 
 Setup Modes:
   1. Preview Mode
@@ -56,10 +69,11 @@ Files created:
   - .env              (Root project configuration)
 
 Examples:
-  node setup.js                  # Interactive mode selection
-  node setup.js --force          # Overwrite existing files
-  npm run setup:env              # Run via npm script
-  npm run setup                  # Full development setup
+  node setup.js                              # Interactive mode selection
+  node setup.js --force                      # Overwrite existing files
+  node setup.js --api-key=vg_abcd123...     # Provide API key directly
+  npm run setup:env                          # Run via npm script
+  npm run setup                              # Full development setup
 `);
   process.exit(0);
 }
@@ -314,11 +328,19 @@ async function createEnvFiles(mode = 'env-only') {
     let apiEnvContent = fs.readFileSync(apiEnvExamplePath, 'utf8');
 
     log('\n📡 AI Configuration', 'blue');
-    const aiApiKey = await promptUser('Enter your AI Gateway API Key (required)');
-
-    if (!aiApiKey || aiApiKey === 'your-key') {
-      log('❌ AI Gateway API Key is required!', 'red');
-      return { success: false, dbPort: null };
+    let aiApiKey;
+    
+    if (providedApiKey) {
+      aiApiKey = providedApiKey;
+      log(`✅ Using provided AI Gateway API Key`, 'green');
+    } else {
+      aiApiKey = await promptUser('Enter your AI Gateway API Key (required)');
+      
+      if (!aiApiKey || aiApiKey === 'your-key') {
+        log('❌ AI Gateway API Key is required!', 'red');
+        log('💡 Tip: You can provide it directly with --api-key flag', 'blue');
+        return { success: false, dbPort: null };
+      }
     }
 
     // Generate APP_KEY

@@ -46,8 +46,16 @@ This launches an interactive setup with 3 options:
 Choose **Preview Mode** for the quickest experience.
 
 ### Step 3 — Provide your AI Gateway key
-During setup, you'll be prompted for:
-- Vercel AI Gateway API Key (paste the key from Step 1)
+**Option A: Direct flag (recommended)**
+```bash
+bun setup --api-key="vg_your_api_key_here"
+```
+This skips the interactive prompt and goes straight to setup.
+
+**Option B: Interactive prompt**  
+If you prefer not to provide the API key in the command, simply run `bun setup`, select option 1 (Preview Mode), and you'll be prompted to enter your key during the setup process.
+
+During setup, you may also be prompted for:
 - Database settings (use defaults)
 - Port configuration (use auto-detected ports)
 
