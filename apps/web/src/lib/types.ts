@@ -23,8 +23,10 @@ export interface JobOffer {
   location: string | null
   employment_type: EmploymentType
   status: string
+  criteria_generation_status: ProcessingStatus
+  criteria_count: number
+  criteria_generated_at: string | null
   posted_at: string | null
-  criteria_count?: number
   selection_criteria?: SelectionCriteria[]
   candidate_scorings?: CandidateScoring[]
   created_at: string

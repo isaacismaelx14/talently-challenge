@@ -71,7 +71,7 @@ export default function JobOffersPage() {
   const onSubmit = async (formData: CreateJobOfferForm) => {
     try {
       await createMutation.mutateAsync(formData)
-      toast.success('Job offer created successfully')
+      toast.success('Job offer created. AI criteria generation started automatically.')
       setIsOpen(false)
       form.reset()
     } catch {
@@ -114,7 +114,7 @@ export default function JobOffersPage() {
             <DialogHeader>
               <DialogTitle>Create New Job Offer</DialogTitle>
               <DialogDescription>
-                Add a new job position. You can generate AI selection criteria after creation.
+                Add a new job position. AI selection criteria will start generating automatically after creation.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
@@ -208,6 +208,7 @@ export default function JobOffersPage() {
                 <TableHead>Employment Type</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>AI Criteria</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -228,6 +229,21 @@ export default function JobOffersPage() {
                     >
                       {job.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          job.criteria_generation_status === 'failed'
+                            ? 'destructive'
+                            : 'secondary'
+                        }
+                        className="capitalize"
+                      >
+                        {job.criteria_generation_status}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{job.criteria_count}</span>
+                    </div>
                   </TableCell>
                   <TableCell>{formatDate(job.created_at)}</TableCell>
                   <TableCell className="text-right">

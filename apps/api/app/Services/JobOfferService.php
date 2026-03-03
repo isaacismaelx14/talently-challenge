@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Services\JobOfferServiceInterface;
+use App\Jobs\GenerateCriteriaJob;
 use App\Models\JobOffer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -21,8 +22,15 @@ class JobOfferService implements JobOfferServiceInterface
     {
         return DB::transaction(function () use ($attributes) {
             $attributes['public_id'] = (string) Str::uuid();
+            $attributes['criteria_generation_status'] = JobOffer::CRITERIA_STATUS_PENDING;
+            $attributes['criteria_count'] = 0;
+            $attributes['criteria_generated_at'] = null;
 
-            return JobOffer::query()->create($attributes);
+            $jobOffer = JobOffer::query()->create($attributes);
+
+            GenerateCriteriaJob::dispatch($jobOffer)->afterCommit();
+
+            return $jobOffer;
         });
     }
 }

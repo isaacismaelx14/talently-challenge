@@ -25,6 +25,10 @@ class CriteriaController extends Controller
 
     public function generate(GenerateCriteriaRequest $request, JobOffer $jobOffer)
     {
+        $jobOffer->update([
+            'criteria_generation_status' => JobOffer::CRITERIA_STATUS_PENDING,
+        ]);
+
         dispatch(new GenerateCriteriaJob($jobOffer));
         return response()->json(['message' => 'Criteria generation started.'], 202);
     }

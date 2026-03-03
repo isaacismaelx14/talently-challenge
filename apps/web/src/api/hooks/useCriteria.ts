@@ -3,7 +3,11 @@ import { apiClient } from '../client'
 import type { SelectionCriteria, ApiResponse } from '../../lib/types'
 import { QUERY_KEYS, STALE_TIMES } from '../../lib/constants'
 
-export function useCriteria(jobOfferId: string) {
+type PollingOptions = {
+  refetchInterval?: number | false
+}
+
+export function useCriteria(jobOfferId: string, options?: PollingOptions) {
   return useQuery({
     queryKey: QUERY_KEYS.JOB_OFFERS.CRITERIA(jobOfferId),
     queryFn: async () => {
@@ -14,6 +18,7 @@ export function useCriteria(jobOfferId: string) {
     },
     enabled: !!jobOfferId,
     staleTime: STALE_TIMES.DETAIL,
+    refetchInterval: options?.refetchInterval ?? false,
   })
 }
 

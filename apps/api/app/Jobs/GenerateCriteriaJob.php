@@ -28,11 +28,28 @@ class GenerateCriteriaJob implements ShouldQueue
 
     public function handle(CriteriaServiceInterface $criteriaService)
     {
-        $criteriaService->generateForJobOffer($this->jobOffer);
+        $this->jobOffer->refresh();
+
+        $this->jobOffer->update([
+            'criteria_generation_status' => JobOffer::CRITERIA_STATUS_PROCESSING,
+        ]);
+
+        $criteria = $criteriaService->generateForJobOffer($this->jobOffer);
+
+        $this->jobOffer->update([
+            'criteria_generation_status' => JobOffer::CRITERIA_STATUS_COMPLETED,
+            'criteria_count' => $criteria->count(),
+            'criteria_generated_at' => now(),
+        ]);
     }
 
     public function failed(\Throwable $exception)
     {
+        $this->jobOffer->refresh();
+        $this->jobOffer->update([
+            'criteria_generation_status' => JobOffer::CRITERIA_STATUS_FAILED,
+        ]);
+
         Log::error("GenerateCriteriaJob failed for JobOffer {$this->jobOffer->id}: " . $exception->getMessage());
     }
 }

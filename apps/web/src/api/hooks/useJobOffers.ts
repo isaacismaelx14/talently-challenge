@@ -3,6 +3,10 @@ import { apiClient } from '../client'
 import type { JobOffer, PaginatedResponse, ApiResponse, CreateJobOfferRequest } from '../../lib/types'
 import { QUERY_KEYS, STALE_TIMES } from '../../lib/constants'
 
+type PollingOptions = {
+  refetchInterval?: number | false
+}
+
 export function useJobOffers(page = 1) {
   return useQuery({
     queryKey: QUERY_KEYS.JOB_OFFERS.LIST(page),
@@ -14,7 +18,7 @@ export function useJobOffers(page = 1) {
   })
 }
 
-export function useJobOffer(id: string) {
+export function useJobOffer(id: string, options?: PollingOptions) {
   return useQuery({
     queryKey: QUERY_KEYS.JOB_OFFERS.DETAIL(id),
     queryFn: async () => {
@@ -23,6 +27,7 @@ export function useJobOffer(id: string) {
     },
     enabled: !!id,
     staleTime: STALE_TIMES.DETAIL,
+    refetchInterval: options?.refetchInterval ?? false,
   })
 }
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams, Link } from 'react-router'
 import { useJobOffer } from '@/api/hooks/useJobOffers'
 import { useCriteria, useGenerateCriteria } from '@/api/hooks/useCriteria'
@@ -21,9 +22,14 @@ import {
 
 export default function JobOfferDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { data: jobData, isLoading: isLoadingJob } = useJobOffer(id!)
-  const { data: criteriaData, isLoading: isLoadingCriteria } = useCriteria(id!)
+  const jobOfferQuery = useJobOffer(id!)
+  const criteriaQuery = useCriteria(id!)
   const generateMutation = useGenerateCriteria()
+
+  const { data: jobData, isLoading: isLoadingJob } = jobOfferQuery
+  const { data: criteriaData, isLoading: isLoadingCriteria } = criteriaQuery
+  const { refetch: refetchJobOffer } = jobOfferQuery
+  const { refetch: refetchCriteria } = criteriaQuery
 
   if (isLoadingJob) {
     return <DetailPageSkeleton />
@@ -53,6 +59,23 @@ export default function JobOfferDetailPage() {
 
   const criteria = criteriaData?.data ?? []
   const hasCriteria = criteria.length > 0
+  const isCriteriaRunning =
+    job.criteria_generation_status === 'pending' ||
+    job.criteria_generation_status === 'processing'
+  const isCriteriaFailed = job.criteria_generation_status === 'failed'
+
+  useEffect(() => {
+    if (!isCriteriaRunning) {
+      return
+    }
+
+    const interval = window.setInterval(() => {
+      refetchJobOffer()
+      refetchCriteria()
+    }, 3000)
+
+    return () => window.clearInterval(interval)
+  }, [isCriteriaRunning, refetchCriteria, refetchJobOffer])
 
   const getPriorityVariant = (priority: string) => {
     switch (priority) {
@@ -137,8 +160,14 @@ export default function JobOfferDetailPage() {
               <p className="text-sm text-muted-foreground">
                 Criteria used to evaluate candidates for this position
               </p>
+              <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                <Badge variant={isCriteriaFailed ? 'destructive' : 'secondary'}>
+                  {job.criteria_generation_status}
+                </Badge>
+                <span>Generated: {job.criteria_count}</span>
+              </div>
             </div>
-            {!hasCriteria && (
+            {!hasCriteria && !isCriteriaRunning && (
               <Button
                 onClick={handleGenerateCriteria}
                 disabled={generateMutation.isPending}
@@ -215,12 +244,21 @@ export default function JobOfferDetailPage() {
                   Generate AI-powered selection criteria based on the job description
                   to evaluate candidates effectively.
                 </p>
+                {isCriteriaRunning && (
+                  <p className="text-xs text-muted-foreground mb-4">
+                    AI is generating criteria. This section refreshes automatically.
+                  </p>
+                )}
                 <Button
                   onClick={handleGenerateCriteria}
-                  disabled={generateMutation.isPending}
+                  disabled={generateMutation.isPending || isCriteriaRunning}
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
-                  {generateMutation.isPending ? 'Generating...' : 'Generate Criteria'}
+                  {isCriteriaRunning
+                    ? 'Generating...'
+                    : generateMutation.isPending
+                      ? 'Generating...'
+                      : 'Generate Criteria'}
                 </Button>
               </CardContent>
             </Card>
