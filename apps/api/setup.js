@@ -14,6 +14,7 @@ const execAsync = promisify(exec);
 const args = process.argv.slice(2);
 const forceOverwrite = args.includes('--force') || args.includes('-f');
 const showHelp = args.includes('--help') || args.includes('-h');
+const useDefaults = args.includes('--use-defaults');
 
 // Extract API key from --api-key flag
 let providedApiKey = null;
@@ -57,6 +58,7 @@ Options:
   -f, --force          Force overwrite existing .env files
   --api-key <key>      Provide AI Gateway API key directly (avoids prompt)
   --mode <mode>        Setup mode: preview, local, or none (avoids mode selection)
+  --use-defaults       Use default values for all prompts (no interactive input, auto-overwrite)
 
 Setup Modes:
   1. Preview Mode
@@ -92,6 +94,8 @@ Examples:
   node setup.js --api-key=vg_abcd123...     # Provide API key directly
   node setup.js --mode=preview              # Use preview mode directly
   node setup.js --mode=preview --api-key=vg_abcd123...  # Fully automated
+  node setup.js --use-defaults              # Use defaults for all prompts
+  node setup.js --use-defaults --api-key=vg_abcd123...  # Fully automated with defaults
   npm run setup:env                          # Run via npm script
   npm run setup                              # Full development setup
 `);
@@ -122,6 +126,17 @@ function generateAppKey() {
 }
 
 function promptUser(question, defaultValue = '') {
+  // If use-defaults flag is set, automatically return the default value
+  if (useDefaults) {
+    if (defaultValue) {
+      console.log(`${question} (${defaultValue}): ${defaultValue}`);
+      return Promise.resolve(defaultValue);
+    } else {
+      console.log(`${question}: [using empty default]`);
+      return Promise.resolve('');
+    }
+  }
+
   return new Promise((resolve) => {
     const prompt = defaultValue
       ? `${question} (${defaultValue}): `
@@ -134,6 +149,18 @@ function promptUser(question, defaultValue = '') {
 }
 
 function promptSetupMode() {
+  // If use-defaults flag is set, automatically return default mode (preview)
+  if (useDefaults) {
+    log('\n🚀 Welcome to Talently Project Setup!', 'bold');
+    log('═══════════════════════════════════════', 'blue');
+    log('\nChoose your setup mode:', 'blue');
+    log('1. Preview mode (Docker Compose with full stack)', 'yellow');
+    log('2. Local development (PostgreSQL + migrations)', 'yellow');
+    log('3. Environment only (just create .env files)', 'yellow');
+    log('\nSelect mode [1-3] (1): 1 [using default]');
+    return Promise.resolve('preview');
+  }
+
   return new Promise((resolve) => {
     log('\n🚀 Welcome to Talenty Project Setup!', 'bold');
     log('═══════════════════════════════════════', 'blue');
@@ -323,7 +350,7 @@ async function createEnvFiles(mode = 'env-only') {
     const apiExists = fs.existsSync(apiEnvPath);
     const rootExists = fs.existsSync(rootEnvPath);
 
-    if ((apiExists || rootExists) && !forceOverwrite) {
+    if ((apiExists || rootExists) && !forceOverwrite && !useDefaults) {
       if (apiExists) log('⚠️  API .env file already exists!', 'yellow');
       if (rootExists) log('⚠️  Root .env file already exists!', 'yellow');
 
@@ -334,8 +361,12 @@ async function createEnvFiles(mode = 'env-only') {
         log('💡 Use --force flag to overwrite automatically', 'blue');
         return { success: false, dbPort: null };
       }
-    } else if ((apiExists || rootExists) && forceOverwrite) {
-      log('🔄 Force overwriting existing .env files...', 'yellow');
+    } else if ((apiExists || rootExists) && (forceOverwrite || useDefaults)) {
+      if (useDefaults) {
+        log('✅ Using --use-defaults flag, overwriting existing files...', 'green');
+      } else {
+        log('✅ Force overwrite enabled, proceeding...', 'green');
+      }
     }
 
     // Check if .env.example exists

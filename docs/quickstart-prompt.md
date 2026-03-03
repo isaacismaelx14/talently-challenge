@@ -35,7 +35,9 @@ Help me execute each step, diagnose any errors, and confirm everything is workin
 ### Step 2 — Install dependencies and run setup
 **Fully automated setup (recommended for AI assistants):**
 
-bun setup --mode=preview --api-key="vg_your_api_key_here"
+bun setup --mode=preview --api-key="vg_your_api_key_here --use-defaults"
+
+The `--use-defaults` flag will skip all interactive prompts and use default values for any questions, allowing the entire setup to run without manual input.
 
 **Manual setup options:**
 If bun is installed:
