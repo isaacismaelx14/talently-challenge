@@ -1,179 +1,253 @@
-# Talently Challenge - CV Scoring System
+# CV Scoring System
 
-A full-stack application for automated CV scoring against job offers using AI-powered analysis.
+A full-stack automated CV scoring platform built for precise candidate evaluation against job requirements. The system uses AI-powered criteria generation and CV extraction with deterministic scoring algorithms to provide objective candidate assessments.
 
-**Stack:**
-- **API**: Laravel 9+ with PostgreSQL, Sanctum auth, and AI integration
-- **Web**: React with TypeScript and modern tooling
+> Built by [isaacismaelx14](https://github.com/isaacismaelx14) with love ♥
 
-## Quick Start
+[![AI Quickstart Prompt](https://img.shields.io/static/v1?label=AI+Quickstart&message=Open+Prompt+%E2%86%92&color=6366f1&style=for-the-badge&logo=openai&logoColor=white)](./docs/quickstart-prompt.md)
 
-### Complete Setup (API + Web)
-
-### Complete Setup (API + Web)
-
-```bash
-# Interactive setup with mode selection
-npm run setup
-```
-
-You'll be prompted to choose your setup mode:
-1. **Preview mode** - Full Docker stack ready for testing
-2. **Local development** - PostgreSQL + dependencies + migrations
-3. **Environment only** - Just creates .env files for manual setup
-
-The script will:
-- Install all dependencies (bun install)  
-- Run interactive setup (creates both API and root .env files)
-- Execute your chosen setup mode automatically
-
-### Test Credentials
+## 🔑 Test Credentials
 
 After setup, you can log in with:
-- **Email**: test@example.local  
-- **Password**: admin
+- **Email**: `test@example.local`  
+- **Password**: `admin`
 
-### Service URLs
+---
 
-**Preview Mode:**
-- Dashboard: http://localhost:3000 (or auto-assigned port)
-- API: http://localhost:8080/v1 (or auto-assigned port)
+## Table of Contents
 
-**Development Mode:**  
-- API: http://localhost:8000/v1 (after running `php artisan serve`)
-- Database: PostgreSQL @ localhost:5433 (or auto-assigned port)
+- [Stack](#stack)
+- [Prerequisites — AI Gateway Setup](#prerequisites--ai-gateway-setup)
+- [Quickstart — Docker (preferred)](#quickstart--docker-preferred)
+- [Local Development](#local-development)
+- [Project Structure](#project-structure)
+- [Root Scripts Reference](#root-scripts-reference)
+- [API Highlights](#api-highlights)
+- [Frontend Highlights](#frontend-highlights)
+- [Notes on AI Usage](#notes-on-ai-usage)
 
-### Individual Component Setup
+---
 
-**API Only:**
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Runtime | **Bun** + Turborepo monorepo |
+| API | Laravel 9+ · PHP 8.2+ · PostgreSQL 16 · Sanctum Auth |
+| Packages | smalot/pdfparser · openai-php/client · Queue (Database Driver) |
+| Web | React 18 · TypeScript · Vite · Tailwind CSS · shadcn/ui |
+| AI | Vercel AI Gateway → OpenAI GPT-4o |
+| Containers | Docker · docker-compose |
+
+---
+
+## Prerequisites — AI Gateway Setup
+
+Before running this project, you need a **Vercel AI Gateway API Key** for the AI-powered features:
+
+1. Visit **[Vercel AI Gateway](https://vercel.com/docs/ai-gateway)**
+2. Create an account or sign in
+3. Set up a credit card (you get **$5 free credits**)
+4. Create an API Gateway and copy your API key
+5. You'll use this key in the setup process below
+
+> **Note:** The AI Gateway is used for criteria generation from job descriptions and CV text extraction. Without it, the scoring features won't work.
+
+---
+
+## Quickstart — Docker (preferred)
+
+The fastest way to run everything together. Builds both images and wires them up with PostgreSQL.
+
 ```bash
-npm run setup:api
+# 1. Install dependencies and run interactive setup
+bun setup                     # This creates .env files and prompts for setup mode
+
+# 2. When prompted during setup, choose "Preview Mode"
+# You'll be asked for your Vercel AI Gateway API key
+
+# Web UI  →  http://localhost:3000
+# API     →  http://localhost:8080/v1
+# API docs → http://localhost:8080/api/documentation
 ```
 
-**Development Servers:**
+To stop:
+
 ```bash
-# Start API server
-npm run dev:api
-
-# Start Web development server  
-npm run dev:web
-
-# Start both (parallel)
-npm run dev
+bun preview:down
 ```
 
-### Manual Setup
+> **No Bun?** `npm run setup` and `npm run preview:down` work without installing Bun. If you want Bun: [https://bun.sh/docs/installation](https://bun.sh/docs/installation)
 
-If you prefer to set up each component manually:
+> **How it works:** The setup script offers three modes: Preview (full Docker), Local Development (DB + dependencies), or Environment Only. Choose Preview for the quickest demo experience.
 
-1. **Install dependencies:**
-   ```bash
-   bun install
-   ```
+---
 
-2. **Configure API:**
-   ```bash
-   cd apps/api
-   npm run setup:env  # Interactive environment setup
-   composer install
-   php artisan migrate
-   ```
+## Local Development
 
-3. **Start development:**
-   ```bash
-   npm run dev  # Starts both API and Web
-   ```
+### Prerequisites
+
+- [Bun](https://bun.sh) ≥ 1.3
+- [PHP](https://www.php.net) ≥ 8.2 with extensions: `pdo_pgsql`, `gd`, `zip`, `mbstring`
+- [Composer](https://getcomposer.org) ≥ 2.0
+- [Docker](https://www.docker.com) (for PostgreSQL)
+
+### 1. Install dependencies
+
+```bash
+bun install          # JS/TS workspace deps
+cd apps/api && composer install    # PHP deps
+```
+
+### 2. Configure environment & setup database
+
+```bash
+bun setup            # Interactive setup - choose "Local Development"
+```
+
+This will:
+- Create `.env` files for both API and web
+- Prompt for your Vercel AI Gateway API key  
+- Start PostgreSQL in Docker
+- Run database migrations
+- Create test user account
+
+Key environment variables:
+
+| Variable | Default | Description |
+|---|---|---|
+| `AI_GATEWAY_API_KEY` | (required) | Your Vercel AI Gateway API key |
+| `AI_GATEWAY_BASE_URL` | `https://ai-gateway.vercel.sh/v1` | Vercel AI Gateway endpoint |
+| `AI_MODEL` | `openai/gpt-4o` | AI model for criteria generation and CV extraction |
+| `DB_HOST` | `127.0.0.1` | PostgreSQL host |
+| `DB_PORT` | `5433` | PostgreSQL port (auto-detected, may vary) |
+
+### 3. Run API + Web
+
+```bash
+# In separate terminals:
+bun dev:api     # Laravel on http://localhost:8000 (auto-reload)
+bun dev:web     # Vite on http://localhost:5173 (HMR)
+
+# Or run both together:
+bun dev
+```
+
+---
 
 ## Project Structure
 
 ```
 talently-challenge/
 ├── apps/
-│   ├── api/           # Laravel 9+ backend API
-│   └── web/           # React frontend
-├── docker-compose.preview.yml
-└── package.json       # Workspace scripts
+│   ├── api/           # Laravel 9+ backend — CV scoring engine
+│   │   ├── app/
+│   │   │   ├── Contracts/Services/      # Service interfaces
+│   │   │   ├── Http/Controllers/Api/V1/ # RESTful API endpoints
+│   │   │   ├── Http/Requests/          # Form validation
+│   │   │   ├── Jobs/                   # Background job processing
+│   │   │   ├── Models/                 # Eloquent models
+│   │   │   └── Services/               # Business logic layer
+│   │   ├── database/migrations/        # Database schema
+│   │   └── tests/                      # API tests
+│   └── web/           # React frontend — CV scoring dashboard
+│       ├── src/
+│       │   ├── features/              # Feature-based organization
+│       │   ├── components/            # Reusable UI components
+│       │   └── api/                   # API client
+│       └── tests/                     # Frontend tests
+├── docker-compose.preview.yml         # Full preview (postgres + api + web)
+└── docs/                              # Documentation and guides
 ```
 
-## Available Scripts
+---
 
-- `npm run setup` - Interactive setup with mode selection
-- `npm run dev` - Start both API and Web in development
-- `npm run build` - Build all applications  
-- `npm run test` - Run API tests
-- `npm run preview` - Docker preview deployment
+## Root Scripts Reference
 
-### Setup Modes Available
-- **Preview**: Full Docker stack (npm run preview)
-- **Development**: Local with PostgreSQL (npm run dev:api)  
-- **Environment**: Manual configuration needed
-
-### Database Management
-- `npm run db:start` - Start PostgreSQL container
-- `npm run db:stop` - Stop PostgreSQL container
-- `npm run db:logs` - View PostgreSQL logs
-
-## Requirements
-
-- **Node.js** 18+ (for tooling and setup scripts)
-- **PHP** 8.1+ (for Laravel API)
-- **PostgreSQL** 16+ (database)
-- **Composer** (PHP dependencies)
-- **Bun** (JavaScript runtime - recommended)
-
-## Configuration
-
-The setup script will prompt you for:
-- AI Gateway API Key (required)
-- Database credentials
-- Application settings
-
-See `apps/api/README.md` for detailed API configuration.
-
-## Troubleshooting
-
-### Setup Mode Selection
-
-**Preview Mode**
-- Best for: Testing, demonstrations, production-like environment
-- Requirements: Docker Desktop running
-- What it does: Starts full containerized stack
-
-**Local Development Mode**  
-- Best for: Active development, debugging, code changes
-- Requirements: Docker Desktop + PHP + Composer
-- What it does: Local API with containerized database
-
-**Environment Only Mode**
-- Best for: Custom setups, CI/CD, specific configurations  
-- Requirements: None (just creates files)
-- What it does: Creates .env files for manual configuration
-
-### Port Conflicts
-
-The setup script automatically handles port conflicts for all modes:
-
-**PostgreSQL Database Ports**
-- Checks if port 5433 is available
-- Suggests next available port if conflict exists  
-- Updates .env files automatically
-
-**Preview Mode Ports**  
-- Checks if ports 3000 (web) and 8080 (api) are available
-- Uses alternative ports if conflicts detected
-- Shows actual URLs with assigned ports
-
-**Manual Port Resolution**
-
-If you need to manually change ports:
 ```bash
-# For PostgreSQL
-npm run db:stop
-# Edit .env file to change POSTGRES_PORT and DB_PORT
-npm run db:start
-
-# For Preview mode
-npm run preview:down
-# Edit docker-compose.preview.yml or set WEB_PORT/API_PORT env vars
-npm run preview
+bun setup        # Interactive setup with mode selection (recommended)
+bun setup:api    # API-only setup
+bun dev          # Run API + Web in development mode
+bun dev:api      # Laravel development server
+bun dev:web      # Vite development server  
+bun build        # Build all workspaces
+bun test         # Run API tests
+bun preview      # docker-compose up (full preview)
+bun preview:down # Stop preview containers
+bun db:start     # Start PostgreSQL only
+bun db:stop      # Stop PostgreSQL
 ```
+
+---
+
+## API Highlights
+
+- **AI-Powered Criteria Generation** — Automatically extracts scoring criteria from job descriptions using GPT-4o
+- **CV Text Extraction** — PDF parsing and AI-enhanced extraction for structured candidate data
+- **Deterministic Scoring** — Transparent, rule-based scoring algorithm (no AI bias in final scores)
+- **Async Processing** — Background jobs for AI operations with status tracking
+- **Service Layer Architecture** — Clean separation of concerns with interface contracts
+- **Sanctum Authentication** — Token-based API authentication
+- **Queue System** — Database-driven job queue for scalable processing
+- **RESTful API** — Versioned endpoints (`/v1`) following REST conventions
+- **Structured Validation** — Form request classes for all input validation
+
+### Scoring Algorithm
+
+| Criteria Type | Weight Calculation | Evaluation Method |
+|---|---|---|
+| `boolean` | High: 1.0, Medium: 0.6, Low: 0.3 | Exact match |
+| `years` | Based on priority level | `>= threshold` or proportional |
+| `enum` | Weighted by priority | Exact or partial match |
+| `score_1_5` | Priority-weighted | Proportional calculation |
+
+---
+
+## Frontend Highlights
+
+- **shadcn/ui + Tailwind CSS** — Modern, accessible component library for rapid UI development
+- **CV Upload & Management** — Drag-and-drop PDF upload with progress tracking
+- **Real-time Scoring** — Live updates as scoring jobs complete in the background
+- **Job Offer Management** — Create and manage job requirements with AI-generated criteria
+- **Scoring Dashboard** — Detailed scoring breakdowns with criteria explanations
+- **Authentication Flow** — Secure login with Sanctum tokens
+- **TypeScript** — Full type safety across the application
+
+> **Note:** The frontend was primarily built with AI assistance to focus development time on the core backend scoring logic and architecture.
+
+---
+
+## Notes on AI Usage
+
+This project strategically leveraged AI assistance across different components:
+
+### **API (Core Logic + AI Refactoring)**
+- **Hand-built foundation** — All core scoring logic, architecture patterns, and business rules were designed and implemented by hand
+- **AI-enhanced optimization** — Used AI to refactor code for Laravel best practices, optimize database queries, and improve code organization
+- **Reviewed implementation** — Every AI suggestion was manually reviewed and tested to ensure correctness and maintainability
+
+### **Setup Script (90% AI Generated)**
+- **Interactive setup automation** — The `apps/api/setup.js` script was primarily generated by AI with manual review
+- **Port conflict resolution** — Intelligent Docker port management and environment configuration
+- **Multi-mode setup** — Preview, Local Development, and Environment-only modes
+
+### **Frontend (AI-First Approach)**  
+- **Rapid prototyping** — Since this is a backend-focused challenge, the entire React frontend was built with AI assistance
+- **Component generation** — UI components, forms, and layout generated using shadcn/ui patterns
+- **Minor manual adjustments** — Visual tweaks and integration fixes (authentication flow still has some spacing issues that could be polished)
+
+### **Docker Optimization**
+- **Image size optimization** — Used AI to optimize Dockerfiles for minimal image sizes
+- **Multi-stage builds** — Efficient build processes for both API and web containers
+
+### **What Remains Human-Crafted**
+- **System architecture** — Service layer pattern, interface design, and overall application structure
+- **Scoring algorithms** — All mathematical calculations and business logic for CV evaluation  
+- **Database design** — Schema design, relationships, and migration strategy
+- **Algorithm validation** — Comprehensive testing of scoring edge cases and criteria evaluation
+
+The AI was used as a powerful **code generation and optimization tool**, but all **critical business logic and architectural decisions** were made by human judgment to ensure the system is robust, maintainable, and meets the specific requirements of a production CV scoring platform.
+
+---
+
+*Created by [isaacismaelx14](https://github.com/isaacismaelx14) with love ♥*

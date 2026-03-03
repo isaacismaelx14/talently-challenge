@@ -12,7 +12,7 @@
         "setup:force": "node setup.js --force",
         "setup:development": "composer install && php artisan migrate",
         "db:start": "docker-compose up -d postgres",
-        "db:stop": "docker-compose down postgres",  
+        "db:stop": "docker-compose down postgres",
         "db:logs": "docker-compose logs -f postgres"
     }
 }
