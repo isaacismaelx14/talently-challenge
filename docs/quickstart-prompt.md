@@ -34,9 +34,8 @@ Help me execute each step, diagnose any errors, and confirm everything is workin
 
 ### Step 2 — Install dependencies and run setup
 **Fully automated setup (recommended for AI assistants):**
-```bash
+
 bun setup --mode=preview --api-key="vg_your_api_key_here"
-```
 
 **Manual setup options:**
 If bun is installed:
@@ -53,9 +52,8 @@ Choose **Preview Mode** for the quickest experience.
 
 ### Step 3 — Provide your AI Gateway key (if not using automated setup)
 **Option A: Direct flag (recommended)**
-```bash
 bun setup --mode=preview --api-key="vg_your_api_key_here"
-```
+
 This completely skips all interactive prompts and goes straight to preview setup.
 
 **Option B: Interactive prompt**  
