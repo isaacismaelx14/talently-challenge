@@ -31,11 +31,27 @@ export default function JobOfferDetailPage() {
   const { refetch: refetchJobOffer } = jobOfferQuery
   const { refetch: refetchCriteria } = criteriaQuery
 
+  const job = jobData?.data
+  const isCriteriaRunning =
+    job?.criteria_generation_status === 'pending' ||
+    job?.criteria_generation_status === 'processing'
+
+  useEffect(() => {
+    if (!isCriteriaRunning) {
+      return
+    }
+
+    const interval = window.setInterval(() => {
+      refetchJobOffer()
+      refetchCriteria()
+    }, 3000)
+
+    return () => window.clearInterval(interval)
+  }, [isCriteriaRunning, refetchCriteria, refetchJobOffer])
+
   if (isLoadingJob) {
     return <DetailPageSkeleton />
   }
-
-  const job = jobData?.data
 
   if (!job) {
     return (
@@ -59,23 +75,7 @@ export default function JobOfferDetailPage() {
 
   const criteria = criteriaData?.data ?? []
   const hasCriteria = criteria.length > 0
-  const isCriteriaRunning =
-    job.criteria_generation_status === 'pending' ||
-    job.criteria_generation_status === 'processing'
   const isCriteriaFailed = job.criteria_generation_status === 'failed'
-
-  useEffect(() => {
-    if (!isCriteriaRunning) {
-      return
-    }
-
-    const interval = window.setInterval(() => {
-      refetchJobOffer()
-      refetchCriteria()
-    }, 3000)
-
-    return () => window.clearInterval(interval)
-  }, [isCriteriaRunning, refetchCriteria, refetchJobOffer])
 
   const getPriorityVariant = (priority: string) => {
     switch (priority) {
